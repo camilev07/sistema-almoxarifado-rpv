@@ -1,0 +1,121 @@
+### ==========================================================
+### SISTEMA DE GESTÃO DE ALMOXARIFADO - MAPEAMENTO DE ROTAS
+### Arquivo .http para teste manual (extensão REST Client no VS Code)
+### API roda em http://localhost:3001
+### ==========================================================
+
+@baseUrl = http://localhost:3001/api
+
+### ---------- HEALTH ----------
+GET {{baseUrl}}/health
+
+### ==========================================================
+### ALUNOS
+### ==========================================================
+
+### Listar todos os alunos
+GET {{baseUrl}}/alunos
+
+### Criar aluno
+POST {{baseUrl}}/alunos
+Content-Type: application/json
+
+{
+  "nome": "Felipe Nogueira",
+  "matricula": "2024006"
+}
+
+### Atualizar aluno
+PUT {{baseUrl}}/alunos/1
+Content-Type: application/json
+
+{
+  "nome": "Ana Souza Atualizada",
+  "matricula": "2024001"
+}
+
+### Remover aluno (falha se houver histórico de empréstimos)
+DELETE {{baseUrl}}/alunos/5
+
+### ==========================================================
+### EQUIPAMENTOS
+### ==========================================================
+
+### Listar todos os equipamentos
+GET {{baseUrl}}/equipamentos
+
+### Listar somente equipamentos disponíveis (usado no formulário de empréstimo)
+GET {{baseUrl}}/equipamentos/disponiveis
+
+### Cadastrar equipamento
+POST {{baseUrl}}/equipamentos
+Content-Type: application/json
+
+{
+  "nome": "Notebook Acer Aspire 5",
+  "numero_patrimonio": "PAT-0009",
+  "status": "disponivel"
+}
+
+### Atualizar equipamento
+PUT {{baseUrl}}/equipamentos/4
+Content-Type: application/json
+
+{
+  "nome": "Multímetro Minipa ET-2042",
+  "numero_patrimonio": "PAT-0004",
+  "status": "manutencao"
+}
+
+### Mudar status (ex.: colocar em manutenção)
+PUT {{baseUrl}}/equipamentos/5/status
+Content-Type: application/json
+
+{
+  "status": "manutencao"
+}
+
+### Remover equipamento (falha se houver histórico de empréstimos)
+DELETE {{baseUrl}}/equipamentos/9
+
+### ==========================================================
+### EMPRÉSTIMOS
+### ==========================================================
+
+### Listar todos os empréstimos (com aluno e equipamento)
+GET {{baseUrl}}/emprestimos
+
+### Listar empréstimos ativos (não devolvidos)
+GET {{baseUrl}}/emprestimos/ativos
+
+### Listar empréstimos em ATRASO (não devolvidos e data_limite < agora) - Dashboard
+GET {{baseUrl}}/emprestimos/atrasados
+
+### Histórico completo (empréstimos finalizados também aparecem - nunca são apagados)
+GET {{baseUrl}}/emprestimos/historico
+
+### Registrar EMPRÉSTIMO (CRÍTICO: só funciona se equipamento estiver 'disponivel')
+POST {{baseUrl}}/emprestimos
+Content-Type: application/json
+
+{
+  "aluno_id": 2,
+  "equipamento_id": 2,
+  "data_limite": "2026-09-15 18:00:00"
+}
+
+### Tentativa de empréstimo de equipamento NÃO disponível (deve retornar 400)
+POST {{baseUrl}}/emprestimos
+Content-Type: application/json
+
+{
+  "aluno_id": 1,
+  "equipamento_id": 7,
+  "data_limite": "2026-09-15 18:00:00"
+}
+
+### Registrar DEVOLUÇÃO (libera o equipamento para 'disponivel')
+PUT {{baseUrl}}/emprestimos/2/devolucao
+
+### OBSERVAÇÃO: NÃO existe DELETE /emprestimos — por regra de negócio,
+### o histórico de empréstimos é preservado. Finalização = data_devolucao.

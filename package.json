@@ -1,0 +1,13 @@
+{
+  "name": "sistema-gestao-almoxarifado",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Scripts orquestradores para o Sistema de Gestão de Almoxarifado",
+  "scripts": {
+    "dev:all": "concurrently -k -n API,FRONTEND -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "install:all": "npm --prefix backend install && npm --prefix frontend install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
