@@ -1,116 +1,261 @@
-# 📦 Sistema de Gestão de Almoxarifado
+📦 Almoxarifado Escolar — Sistema de Controle de Equipamentos
+Sobre o projeto
 
-Aplicação web **Fullstack** para digitalizar o controle de empréstimos de equipamentos
-(notebooks, multímetros e kits de robótica) em um almoxarifado escolar.
+O Sistema de Gestão de Almoxarifado é uma aplicação web criada para facilitar o controle dos equipamentos utilizados em um ambiente escolar.
 
-**Stack:** Next.js (SPA) + Express (API) + MySQL 8.
+A proposta é substituir o controle manual dos empréstimos por um sistema centralizado, no qual seja possível saber quem retirou determinado equipamento, quando ele foi retirado, qual é o prazo de devolução e quais itens estão disponíveis no momento.
 
----
+Entre os materiais que podem ser administrados estão notebooks, multímetros e kits de robótica.
 
-## Arquitetura
+🧩 Como o sistema funciona
 
-```
-frontend  (Next.js, http://localhost:3000)  →  backend (Express, http://localhost:3001)  →  MySQL (banco almoxarifado)
-```
+A aplicação é dividida em três partes principais:
 
-- **Frontend:** SPA em Next.js (App Router) que consome a API via JSON.
-- **Backend:** API REST Express com CORS e pool de conexões (`mysql2`).
+                    ┌──────────────────────┐
+                    │      Next.js         │
+                    │      Frontend        │
+                    │     :3000            │
+                    └──────────┬───────────┘
+                               │ JSON / HTTP
+                               ▼
+                    ┌──────────────────────┐
+                    │       Express        │
+                    │         API          │
+                    │       :3001          │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │       MySQL 8        │
+                    │     almoxarifado     │
+                    └──────────────────────┘
 
-## Estrutura
 
-```
+O frontend é responsável pela interface utilizada pelos funcionários do almoxarifado. O backend concentra as regras do sistema e disponibiliza os dados por meio de uma API REST. O MySQL armazena os alunos, equipamentos e registros de empréstimos.
+
+Tecnologias utilizadas
+Next.js — interface e navegação da aplicação.
+Express.js — criação da API REST.
+MySQL 8 — armazenamento dos dados.
+mysql2 — comunicação entre a API e o banco.
+CORS — comunicação entre frontend e backend.
+Concurrently — execução dos dois servidores durante o desenvolvimento.
+🗂️ Organização dos arquivos
+almoxarifado/
+│
 ├── database/
-│   ├── schema.sql      # criação do banco e tabelas
-│   └── seed.sql        # dados de exemplo
+│   ├── schema.sql
+│   └── seed.sql
+│
 ├── backend/
 │   ├── src/
-│   │   ├── server.js   # bootstrap da API
-│   │   ├── db.js       # conexão MySQL
-│   │   └── routes/     # alunos, equipamentos, emprestimos
-│   ├── .env            # credenciais do banco (não comitar)
+│   │   ├── server.js
+│   │   ├── db.js
+│   │   └── routes/
+│   ├── .env
 │   ├── .env.example
-│   └── routes.http     # mapeamento de rotas (REST Client)
+│   └── routes.http
+│
 ├── frontend/
-│   └── src/app/        # páginas (Dashboard, Alunos, Equipamentos, Empréstimos, Histórico)
-└── docs/DER.md         # modelo de entidades e relacionamentos
-```
+│   └── src/
+│       └── app/
+│
+└── docs/
+    └── DER.md
 
-## Pré-requisitos
 
-- Node.js ≥ 18
-- MySQL 8 (serviço rodando)
-- Cliente `mysql` no ambiente (ou caminho completo)
+Os scripts SQL ficam separados do código da aplicação. O backend possui as configurações da API e do banco, enquanto o frontend concentra as telas do sistema.
 
-## Como rodar
+🖥️ Módulos da aplicação
 
-### 1. Banco de dados
+A interface é organizada em diferentes áreas para facilitar o uso:
 
-Configure a senha do MySQL no arquivo `backend\.env` (ou renomeie `.env.example`).
+Dashboard
 
-```bash
+Apresenta uma visão geral do almoxarifado, incluindo informações importantes sobre os empréstimos e os itens que estão em atraso.
+
+Alunos
+
+Permite cadastrar e consultar os alunos que podem realizar empréstimos.
+
+Os principais dados são:
+
+Nome;
+Matrícula.
+Equipamentos
+
+Centraliza o cadastro e o acompanhamento dos equipamentos.
+
+Cada item possui:
+
+Nome;
+Número de patrimônio;
+Status atual.
+Empréstimos
+
+É o módulo responsável pela retirada dos equipamentos.
+
+O usuário seleciona o aluno, o equipamento e informa o prazo de devolução. Apenas equipamentos disponíveis podem ser selecionados.
+
+Histórico
+
+Exibe os empréstimos já realizados, incluindo aqueles que foram encerrados.
+
+Os registros antigos permanecem armazenados para manter a rastreabilidade das movimentações.
+
+🔐 Regras importantes
+
+A aplicação possui validações tanto na interface quanto na API.
+
+Um equipamento ocupado não pode ser emprestado.
+
+Mesmo que alguém tente enviar diretamente uma requisição para a API, o backend verifica o status atual do equipamento antes de criar o empréstimo. Caso ele não esteja disponível, a operação é recusada com HTTP 400.
+
+Durante um empréstimo, o equipamento deixa de aparecer entre os itens disponíveis. Quando ocorre a devolução, o sistema registra a data e libera novamente o equipamento.
+
+O registro do empréstimo não é apagado após a devolução. Dessa forma, o sistema consegue manter o histórico completo das movimentações.
+
+🔄 Fluxo de um empréstimo
+
+O processo segue basicamente estas etapas:
+
+Aluno seleciona o equipamento
+            ↓
+Sistema verifica disponibilidade
+            ↓
+Equipamento disponível?
+       ↙             ↘
+     NÃO              SIM
+      ↓                ↓
+   Retorna 400     Cria empréstimo
+                       ↓
+              Equipamento fica
+                indisponível
+                       ↓
+                 Devolução
+                       ↓
+              Registra a data
+                       ↓
+              Libera equipamento
+
+
+Essa validação impede que dois empréstimos sejam registrados para o mesmo equipamento enquanto ele estiver em uso.
+
+🌐 Endpoints principais
+
+A API disponibiliza endpoints para consultar equipamentos, controlar empréstimos e acompanhar atrasos.
+
+Operação	Endpoint	Finalidade
+Consultar	GET /api/equipamentos/disponiveis	Buscar equipamentos livres para retirada
+Criar	POST /api/emprestimos	Registrar um novo empréstimo
+Devolver	PUT /api/emprestimos/:id/devolucao	Finalizar um empréstimo
+Consultar	GET /api/emprestimos/atrasados	Encontrar empréstimos fora do prazo
+Consultar	GET /api/emprestimos/historico	Visualizar todas as movimentações
+
+Para facilitar os testes, todas as rotas também estão descritas em backend/routes.http, que pode ser utilizado com o REST Client do VS Code.
+
+🛠️ Configuração do ambiente
+Requisitos
+
+Para executar o projeto, é necessário possuir:
+
+Node.js 18 ou superior;
+MySQL 8 em execução;
+Cliente mysql.
+Banco de dados
+
+Primeiro, configure as credenciais no arquivo .env:
+
 cd backend
-cp .env.example .env   # edite DB_USER / DB_PASSWORD
-```
+cp .env.example .env
 
-Crie o banco e carregue os dados de exemplo:
 
-```bash
+Depois, crie as tabelas e insira os dados iniciais:
+
 mysql -u root -p < database/schema.sql
 mysql -u root -p < database/seed.sql
-```
 
-### 2. Backend (API)
-
-```bash
+API
 cd backend
 npm install
-npm run dev          # → http://localhost:3001
-```
+npm run dev
 
-Verifique: `GET http://localhost:3001/api/health` → `{ "status": "ok" }`
 
-### 3. Frontend
+A API será executada em:
 
-```bash
+http://localhost:3001
+
+
+O endpoint abaixo pode ser utilizado para verificar o funcionamento:
+
+GET /api/health
+
+
+Resposta:
+
+{
+  "status": "ok"
+}
+
+Interface
+
+Em outro terminal:
+
 cd frontend
 npm install
-npm run dev          # → http://localhost:3000
-```
+npm run dev
 
-> A URL da API é configurável via env `NEXT_PUBLIC_API_BASE` (padrão `http://localhost:3001/api`).
 
-### Iniciar Front + Backend de uma vez (modo dev)
+Depois, acesse:
 
-Na raiz do projeto:
+http://localhost:3000
 
-```bash
-npm install          # instala o concurrently (orquestrador)
-npm run dev:all      # inicia API (:3001) e FRONTEND (:3000) juntos
-```
 
-O `dev:all` usa a ferramenta `concurrently` para executar os dois servidores em paralelo,
-com prefixos coloridos `[API]` e `[FRONTEND]` no terminal. A flag `-k` garante que, se um
-dos processos for encerrado, o outro também é. Para instalar as dependências de ambos os
-subprojetos de uma vez: `npm run install:all`.
+A API utilizada pelo frontend pode ser alterada através da variável:
 
-## Rotas da API (resumo)
+NEXT_PUBLIC_API_BASE
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/api/equipamentos/disponiveis` | Somente equipamentos no almoxarifado (formulário de empréstimo) |
-| POST | `/api/emprestimos` | Registra empréstimo (**só se status = disponível**) |
-| PUT | `/api/emprestimos/:id/devolucao` | Registra devolução e libera o equipamento |
-| GET | `/api/emprestimos/atrasados` | Empréstimos em atraso (Dashboard) |
-| GET | `/api/emprestimos/historico` | Histórico imutável (nunca usa DELETE) |
 
-Arquivo completo e testável: `backend/routes.http` (extensão REST Client no VS Code).
+Caso nenhuma configuração seja informada, será utilizado:
 
-## Regras de negócio implementadas
+http://localhost:3001/api
 
-1. ✅ Cadastro de **alunos** (nome, matrícula) e **equipamentos** (nome, patrimônio, status).
-2. ✅ Empréstimo registra data de retirada e data limite.
-3. ✅ **A API nunca** empresta equipamento com status ≠ `disponível` (retorna 400).
-4. ✅ **O formulário** de empréstimo mostra apenas equipamentos disponíveis.
-5. ✅ Devolução registra data e volta status para `disponível`.
-6. ✅ **Histórico preservado** — empréstimo finalizado não é apagado (sem DELETE), garantindo rastreabilidade.
-7. ✅ **Dashboard** com resumo e lista destacada de empréstimos **em atraso**.
+🚀 Ambiente de desenvolvimento completo
+
+Também é possível iniciar o frontend e a API com um único comando.
+
+Na raiz:
+
+npm install
+npm run install:all
+npm run dev:all
+
+
+O concurrently mantém os dois processos rodando ao mesmo tempo:
+
+[API]       http://localhost:3001
+[FRONTEND]  http://localhost:3000
+
+
+Caso um dos serviços seja encerrado, a opção -k também encerra o processo restante.
+
+📌 Resultado esperado
+
+Ao final, o sistema oferece um fluxo completo para gerenciamento do almoxarifado:
+
+Cadastro de alunos
+        ↓
+Cadastro de equipamentos
+        ↓
+Controle de disponibilidade
+        ↓
+Registro de empréstimos
+        ↓
+Acompanhamento dos prazos
+        ↓
+Registro de devoluções
+        ↓
+Histórico das movimentações
+
+
+A solução foi estruturada para manter o controle dos equipamentos de forma simples, evitar empréstimos indevidos e preservar todas as informações necessárias para consultar o histórico do almoxarifado.
