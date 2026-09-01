@@ -13,7 +13,7 @@ export default function RootLayout({ children }) {
         <header className="navbar">
           <div className="brand">
             <span className="brand-icon">📦</span>
-            <strong>Almoxarifado</strong>
+            <span>Almoxarifado</span>
           </div>
           <nav>
             <Link href="/">Dashboard</Link>
@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
         </header>
         <main className="container">{children}</main>
         <footer className="footer">
-          Sistema de Gestão de Almoxarifado — Projeto Fullstack (Next.js + Express + MySQL)
+          Almoxarifado · Next.js + Express + MySQL
         </footer>
       </body>
     </html>

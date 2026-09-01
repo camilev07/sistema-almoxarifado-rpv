@@ -19,7 +19,6 @@ export default function Emprestimos() {
         api.listarAtivos()
       ]);
       setAlunos(alunos);
-      // REGRA DE INTERFACE: o formulário só mostra equipamentos disponíveis
       setDisponiveis(disponiveis);
       setAtivos(ativos);
       setForm((f) => ({
@@ -85,7 +84,9 @@ export default function Emprestimos() {
       {success && <div className="msg-success">{success}</div>}
 
       <div className="card">
-        <h2 style={{ fontSize: 16, marginBottom: 12 }}>Registrar nova retirada</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 16 }}>
+          Registrar nova retirada
+        </h2>
         <form className="form-grid" onSubmit={registrarEmprestimo}>
           <div className="field">
             <label>Aluno</label>
@@ -127,7 +128,9 @@ export default function Emprestimos() {
       </div>
 
       <div className="card mt-4">
-        <h2 style={{ fontSize: 16, marginBottom: 12 }}>Empréstimos em andamento</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 16 }}>
+          Empréstimos em andamento
+        </h2>
         <table>
           <thead>
             <tr>
@@ -141,12 +144,12 @@ export default function Emprestimos() {
           </thead>
           <tbody>
             {ativos.length === 0 && (
-              <tr><td colSpan="6">Nenhum empréstimo em andamento.</td></tr>
+              <tr><td colSpan="6" style={{ color: 'var(--gray-600)' }}>Nenhum empréstimo em andamento.</td></tr>
             )}
             {ativos.map((p) => (
               <tr key={p.id}>
                 <td>{p.equipamento_nome}</td>
-                <td>{p.aluno_nome} <small>({p.matricula})</small></td>
+                <td>{p.aluno_nome} <span style={{ color: 'var(--gray-600)', fontSize: 12.5 }}>({p.matricula})</span></td>
                 <td>{formatarData(p.data_retirada)}</td>
                 <td>{formatarData(p.data_limite, false)}</td>
                 <td>

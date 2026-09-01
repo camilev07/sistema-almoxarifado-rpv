@@ -44,7 +44,7 @@ export default function Dashboard() {
   }
 
   if (!resumo) {
-    return <div>Carregando dados do almoxarifado...</div>;
+    return <div style={{ color: 'var(--gray-600)' }}>Carregando dados do almoxarifado...</div>;
   }
 
   return (
@@ -83,9 +83,11 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <h2>⚠️ Empréstimos em ATRASO</h2>
+      <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 12 }}>
+        Empréstimos em atraso
+      </h2>
       {atrasados.length === 0 ? (
-        <div className="msg-success">Nenhum empréstimo em atraso. Tudo em dia. ✅</div>
+        <div className="msg-success">Nenhum empréstimo em atraso. Tudo em dia.</div>
       ) : (
         <div className="alert-box">
           <h3>{atrasados.length} empréstimo(s) vencido(s), sem devolução.</h3>
@@ -102,14 +104,14 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {atrasados.map((p) => (
-                  <tr key={p.id} style={{ background: 'var(--danger-bg)' }}>
+                  <tr key={p.id}>
                     <td>
                       {p.equipamento_nome}
                       <br />
-                      <small>{p.numero_patrimonio}</small>
+                      <span style={{ color: 'var(--gray-600)', fontSize: 12.5 }}>{p.numero_patrimonio}</span>
                     </td>
                     <td>
-                      {p.aluno_nome} <small>({p.matricula})</small>
+                      {p.aluno_nome} <span style={{ color: 'var(--gray-600)', fontSize: 12.5 }}>({p.matricula})</span>
                     </td>
                     <td>{formatarData(p.data_retirada)}</td>
                     <td>{formatarData(p.data_limite, false)}</td>
@@ -127,7 +129,7 @@ export default function Dashboard() {
       )}
 
       <div className="mt-4">
-        <Link className="link" href="/emprestimos">→ Ir para Empréstimos</Link>
+        <Link className="link" href="/emprestimos">Ir para Empréstimos →</Link>
       </div>
     </>
   );

@@ -27,7 +27,7 @@ export default function Historico() {
       <h1>Histórico de Empréstimos</h1>
       <p className="page-subtitle">
         Registro completo e imutável. Por regra de negócio, os empréstimos nunca são eliminados,
-        garantendo a rastreabilidade de quem usou cada equipamento.
+        garantindo a rastreabilidade de quem usou cada equipamento.
       </p>
 
       <div className="card">
@@ -44,12 +44,12 @@ export default function Historico() {
           </thead>
           <tbody>
             {historico.length === 0 && (
-              <tr><td colSpan="6">Ainda não há empréstimos registrados.</td></tr>
+              <tr><td colSpan="6" style={{ color: 'var(--gray-600)' }}>Ainda não há empréstimos registrados.</td></tr>
             )}
             {historico.map((p) => (
               <tr key={p.id}>
                 <td>{p.equipamento_nome}</td>
-                <td>{p.aluno_nome} <small>({p.matricula})</small></td>
+                <td>{p.aluno_nome} <span style={{ color: 'var(--gray-600)', fontSize: 12.5 }}>({p.matricula})</span></td>
                 <td>{formatarData(p.data_retirada)}</td>
                 <td>{formatarData(p.data_limite, false)}</td>
                 <td>{formatarData(p.data_devolucao, false)}</td>
